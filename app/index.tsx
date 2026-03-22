@@ -1,4 +1,5 @@
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -83,6 +84,11 @@ export default function Index() {
   // Hook personalizzato — gestisce il caricamento dei parcheggi da Supabase
   // restituisce: lista parcheggi, stato loading, errore, funzione per ricaricare
   const { parcheggi, loading, errore, caricaParcheggi } = useParcheggi();
+  useFocusEffect(
+    useCallback(() => {
+      caricaParcheggi();
+    }, []),
+  );
 
   // Mostra lo spinner mentre i dati vengono caricati da Supabase
   if (loading) {

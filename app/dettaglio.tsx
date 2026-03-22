@@ -115,9 +115,9 @@ export default function Dettaglio() {
               padding: 12,
               borderRadius: 8,
             }}
-            onPress={() => {
-              inviaRecensione();
-              router.push("/");
+            onPress={async () => {
+              await inviaRecensione(); // aspetta che finisca
+              router.dismissAll(); // poi torna alla home
             }}
             disabled={invio}
           >
