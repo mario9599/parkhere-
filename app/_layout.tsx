@@ -15,6 +15,8 @@ export default function Layout() {
         name="dettaglio"
         options={{ title: "Dettaglio Parcheggio" }}
       />
+      <Stack.Screen name="login" options={{ title: "Accedi" }} />
+      <Stack.Screen name="registrazione" options={{ title: "Registrati" }} />
     </Stack>
   );
 }

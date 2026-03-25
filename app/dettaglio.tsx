@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { Colors } from "../constants/colors";
+import { useAuth } from "../hooks/useAuth";
 import { aggiungiRecensioni, getRecensioni } from "../services/parcheggi";
 import { Recensione } from "../types";
 
@@ -19,6 +20,7 @@ export default function Dettaglio() {
   const [testo, setTesto] = useState("");
   const [valutazione, setValutazione] = useState(5);
   const [invio, setInvio] = useState(false);
+  const { utente } = useAuth();
 
   const caricaRecensioni = async () => {
     try {
@@ -41,7 +43,8 @@ export default function Dettaglio() {
       setInvio(true);
       await aggiungiRecensioni({
         parcheggio_id: id as string,
-        nome_utente: "Utente",
+        nome_utente:
+          utente?.user_metadata?.nome_utente || utente?.email || "Utente",
         testo,
         valutazione,
       });

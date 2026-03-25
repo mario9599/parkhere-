@@ -8,7 +8,9 @@ import {
   View,
 } from "react-native";
 import { Colors } from "../constants/colors";
+import { useAuth } from "../hooks/useAuth";
 import { useParcheggi } from "../hooks/useParcheggi";
+import { esci } from "../services/auth";
 import { Parcheggio } from "../types";
 
 // Componente riutilizzabile — mostra la carta di un singolo parcheggio
@@ -84,6 +86,13 @@ export default function Index() {
   // Hook personalizzato — gestisce il caricamento dei parcheggi da Supabase
   // restituisce: lista parcheggi, stato loading, errore, funzione per ricaricare
   const { parcheggi, loading, errore, caricaParcheggi } = useParcheggi();
+  const { utente } = useAuth();
+
+  const handleLogout = async () => {
+    await esci();
+    router.replace("/");
+  };
+
   useFocusEffect(
     useCallback(() => {
       caricaParcheggi();
@@ -136,21 +145,59 @@ export default function Index() {
   // Schermata principale — lista di tutti i parcheggi
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background, padding: 16 }}>
-      {/* Contatore parcheggi trovati */}
+      {/* Header con stato login */}
+      {utente ? (
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 16,
+          }}
+        >
+          <Text style={{ color: Colors.gray, fontSize: 14 }}>
+            👤 {utente.user_metadata?.nome_utente || utente.email}
+          </Text>
+          <TouchableOpacity
+            style={{
+              backgroundColor: Colors.danger,
+              padding: 8,
+              borderRadius: 8,
+            }}
+            onPress={handleLogout}
+          >
+            <Text style={{ color: Colors.white, fontWeight: "bold" }}>
+              Esci
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <TouchableOpacity
+          style={{
+            backgroundColor: Colors.primary,
+            padding: 12,
+            borderRadius: 8,
+            marginBottom: 16,
+            alignItems: "center",
+          }}
+          onPress={() => router.push("/login")}
+        >
+          <Text style={{ color: Colors.white, fontWeight: "bold" }}>
+            🔐 Accedi per lasciare recensioni
+          </Text>
+        </TouchableOpacity>
+      )}
+
       <Text style={{ fontSize: 16, color: Colors.gray, marginBottom: 16 }}>
         {parcheggi.length} parcheggi trovati
       </Text>
 
-      {/* FlatList — più performante di map per liste lunghe
-          keyExtractor — usa l'id come chiave univoca per ogni elemento
-          renderItem — renderizza CartaParcheggio per ogni parcheggio */}
       <FlatList
         data={parcheggi}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <CartaParcheggio
             parcheggio={item}
-            // Naviga alla schermata dettaglio passando id e nome del parcheggio
             onPress={() =>
               router.push(`/dettaglio?id=${item.id}&nome=${item.nome}`)
             }
