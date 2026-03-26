@@ -1,11 +1,11 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { Colors } from "../constants/colors";
 import { registra } from "../services/auth";
@@ -29,7 +29,7 @@ export default function Registrazione() {
       }
 
       await registra(email, password, nomeUtente);
-      router.replace("/");
+      router.push("/login");
     } catch (err) {
       setErrore(err.message);
     } finally {
