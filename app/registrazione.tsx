@@ -17,17 +17,16 @@ export default function Registrazione() {
   const [confermaPassword, setConfermaPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
+  const [mostraPassword, setMostraPassword] = useState(false);
+  const [mostraConfermaPassword, setMostraConfermaPassword] = useState(false);
 
   const handleRegistrazione = async () => {
     try {
       setLoading(true);
       setErrore(null);
-
-      // Controlla che le password coincidano
       if (password !== confermaPassword) {
         throw new Error("Le password non coincidono");
       }
-
       await registra(email, password, nomeUtente);
       router.push("/login");
     } catch (err) {
@@ -126,21 +125,29 @@ export default function Registrazione() {
       >
         Password
       </Text>
-      <TextInput
-        style={{
-          backgroundColor: Colors.white,
-          borderWidth: 1,
-          borderColor: Colors.lightGray,
-          borderRadius: 8,
-          padding: 12,
-          marginBottom: 16,
-          fontSize: 16,
-        }}
-        placeholder="Minimo 8 caratteri, una maiuscola, un numero"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+      <View style={{ position: "relative", marginBottom: 16 }}>
+        <TextInput
+          style={{
+            backgroundColor: Colors.white,
+            borderWidth: 1,
+            borderColor: Colors.lightGray,
+            borderRadius: 8,
+            padding: 12,
+            fontSize: 16,
+            paddingRight: 50,
+          }}
+          placeholder="Minimo 8 caratteri, una maiuscola, un numero"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={!mostraPassword}
+        />
+        <TouchableOpacity
+          style={{ position: "absolute", right: 12, top: 12 }}
+          onPress={() => setMostraPassword(!mostraPassword)}
+        >
+          <Text style={{ fontSize: 20 }}>{mostraPassword ? "🙈" : "👁️"}</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Campo conferma password */}
       <Text
@@ -153,21 +160,31 @@ export default function Registrazione() {
       >
         Conferma password
       </Text>
-      <TextInput
-        style={{
-          backgroundColor: Colors.white,
-          borderWidth: 1,
-          borderColor: Colors.lightGray,
-          borderRadius: 8,
-          padding: 12,
-          marginBottom: 24,
-          fontSize: 16,
-        }}
-        placeholder="Ripeti la password"
-        value={confermaPassword}
-        onChangeText={setConfermaPassword}
-        secureTextEntry
-      />
+      <View style={{ position: "relative", marginBottom: 24 }}>
+        <TextInput
+          style={{
+            backgroundColor: Colors.white,
+            borderWidth: 1,
+            borderColor: Colors.lightGray,
+            borderRadius: 8,
+            padding: 12,
+            fontSize: 16,
+            paddingRight: 50,
+          }}
+          placeholder="Ripeti la password"
+          value={confermaPassword}
+          onChangeText={setConfermaPassword}
+          secureTextEntry={!mostraConfermaPassword}
+        />
+        <TouchableOpacity
+          style={{ position: "absolute", right: 12, top: 12 }}
+          onPress={() => setMostraConfermaPassword(!mostraConfermaPassword)}
+        >
+          <Text style={{ fontSize: 20 }}>
+            {mostraConfermaPassword ? "🙈" : "👁️"}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Errore */}
       {errore && (

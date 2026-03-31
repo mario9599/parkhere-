@@ -1,11 +1,11 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { Colors } from "../constants/colors";
 import { accedi } from "../services/auth";
@@ -15,13 +15,14 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
+  const [mostraPassword, setMostraPassword] = useState(false);
 
   const handleLogin = async () => {
     try {
       setLoading(true);
       setErrore(null);
       await accedi(email, password);
-      router.dismissAll();
+      router.replace("/");
     } catch (err) {
       setErrore(err.message);
     } finally {
@@ -91,21 +92,29 @@ export default function Login() {
       >
         Password
       </Text>
-      <TextInput
-        style={{
-          backgroundColor: Colors.white,
-          borderWidth: 1,
-          borderColor: Colors.lightGray,
-          borderRadius: 8,
-          padding: 12,
-          marginBottom: 24,
-          fontSize: 16,
-        }}
-        placeholder="La tua password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+      <View style={{ position: "relative", marginBottom: 24 }}>
+        <TextInput
+          style={{
+            backgroundColor: Colors.white,
+            borderWidth: 1,
+            borderColor: Colors.lightGray,
+            borderRadius: 8,
+            padding: 12,
+            fontSize: 16,
+            paddingRight: 50,
+          }}
+          placeholder="La tua password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={!mostraPassword}
+        />
+        <TouchableOpacity
+          style={{ position: "absolute", right: 12, top: 12 }}
+          onPress={() => setMostraPassword(!mostraPassword)}
+        >
+          <Text style={{ fontSize: 20 }}>{mostraPassword ? "🙈" : "👁️"}</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Errore */}
       {errore && (
