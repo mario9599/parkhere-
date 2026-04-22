@@ -1,9 +1,10 @@
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -12,7 +13,6 @@ import { useAuth } from "../hooks/useAuth";
 import { useParcheggi } from "../hooks/useParcheggi";
 import { esci } from "../services/auth";
 import { Parcheggio } from "../types";
-
 // Componente riutilizzabile — mostra la carta di un singolo parcheggio
 // riceve il parcheggio come prop e una funzione onPress per la navigazione
 function CartaParcheggio({
@@ -87,11 +87,15 @@ export default function Index() {
   // restituisce: lista parcheggi, stato loading, errore, funzione per ricaricare
   const { parcheggi, loading, errore, caricaParcheggi } = useParcheggi();
   const { utente } = useAuth();
-
+  const [ricerca, setRicerca] = useState("");
   const handleLogout = async () => {
     await esci();
     router.replace("/");
   };
+
+  const parcheggiFiltrati = parcheggi.filter((p) =>
+    p.nome.toLowerCase().includes(ricerca.toLowerCase()),
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -189,11 +193,26 @@ export default function Index() {
       )}
 
       <Text style={{ fontSize: 16, color: Colors.gray, marginBottom: 16 }}>
-        {parcheggi.length} parcheggi trovati
+        {parcheggiFiltrati.length} parcheggi trovati
       </Text>
 
+      <TextInput
+        style={{
+          backgroundColor: Colors.white,
+          borderWidth: 1,
+          borderColor: Colors.lightGray,
+          borderRadius: 8,
+          padding: 12,
+          marginBottom: 16,
+          fontSize: 16,
+        }}
+        placeholder="Cerca parcheggio..."
+        value={ricerca}
+        onChangeText={(testo) => setRicerca(testo)}
+      />
+
       <FlatList
-        data={parcheggi}
+        data={parcheggiFiltrati}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <CartaParcheggio

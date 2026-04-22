@@ -16,12 +16,12 @@ export type Parcheggio = {
   createdAt: string;
 };
 
-// Recensione
+//recensione dell'utente
 export type Recensione = {
   id: string;
   parcheggioId: string;
-  utenteId: string;
-  nomeUtente: string;
+  utente_id: string;
+  nome_utente: string;
   testo: string;
   valutazione: number;
   createdAt: string;

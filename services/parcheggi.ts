@@ -24,7 +24,18 @@ export const getRecensioni = async (
 export const aggiungiRecensioni = async (
   recensione: Omit<Recensione, "id" | "createdAt">,
 ): Promise<void> => {
-  const { error } = await supabase.from("recensioni").insert(recensione);
+  // Recupera l'utente corrente
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user)
+    throw new Error("Devi essere autenticato per lasciare una recensione");
+
+  const { error } = await supabase.from("recensioni").insert({
+    ...recensione,
+    utente_id: user.id, // ← salva l'id dell'utente
+  });
+
   if (error) throw new Error(error.message);
 };
 
@@ -32,5 +43,17 @@ export const aggiungiParcheggio = async (
   parcheggio: Omit<Parcheggio, "id" | "createdAt">,
 ): Promise<void> => {
   const { error } = await supabase.from("parcheggi").insert(parcheggio);
+  if (error) throw new Error(error.message);
+};
+
+// Elimina una recensione — solo l'autore può eliminarla
+export const eliminaRecensione = async (
+  recensioneId: string,
+): Promise<void> => {
+  const { error } = await supabase
+    .from("recensioni")
+    .delete()
+    .eq("id", recensioneId);
+
   if (error) throw new Error(error.message);
 };
