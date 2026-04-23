@@ -29,6 +29,7 @@ const programmaNotifiche = async (scadeAlle: number, indirizzo: string) => {
   const msAllaScadenza = scadeAlle - ora;
 
   // Notifica 10 minuti prima della scadenza
+  // Notifica 10 minuti prima della scadenza
   if (msAllaScadenza > 10 * 60 * 1000) {
     await Notifications.scheduleNotificationAsync({
       content: {
@@ -37,6 +38,7 @@ const programmaNotifiche = async (scadeAlle: number, indirizzo: string) => {
         sound: true,
       },
       trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
         seconds: Math.floor((msAllaScadenza - 10 * 60 * 1000) / 1000),
       },
     });
@@ -50,6 +52,7 @@ const programmaNotifiche = async (scadeAlle: number, indirizzo: string) => {
       sound: true,
     },
     trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
       seconds: Math.floor(msAllaScadenza / 1000),
     },
   });

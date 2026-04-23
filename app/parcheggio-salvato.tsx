@@ -1,18 +1,19 @@
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Platform,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { Colors } from "../constants/colors";
 import { useParcheggioLocale } from "../hooks/useParcheggioLocale";
 
 const DURATE = [
+  { label: "1 min", valore: 1 },
   { label: "10 min", valore: 10 },
   { label: "30 min", valore: 30 },
   { label: "1 ora", valore: 60 },
