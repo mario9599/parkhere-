@@ -34,3 +34,16 @@ export type ParcheggioSalvato = {
   indirizzo: string;
   savedAt: string;
 };
+
+// Parcheggio salvato localmente sul dispositivo
+export type ParcheggioLocale = {
+  id: string;
+  latitude: number;
+  longitude: number;
+  indirizzo: string;
+  note: string;
+  foto?: string; // opzionale
+  savedAt: number; // timestamp in millisecondi
+  scadeAlle: number; // timestamp quando si elimina automaticamente
+  eliminaAlle: number;
+};

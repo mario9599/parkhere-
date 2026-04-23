@@ -17,6 +17,14 @@ export default function Layout() {
       />
       <Stack.Screen name="login" options={{ title: "Accedi" }} />
       <Stack.Screen name="registrazione" options={{ title: "Registrati" }} />
+      <Stack.Screen
+        name="aggiungi-parcheggio"
+        options={{ title: "Aggiungi Parcheggio" }}
+      />
+      <Stack.Screen
+        name="parcheggio-salvato"
+        options={{ title: "Il mio parcheggio", headerBackVisible: true }}
+      />
     </Stack>
   );
 }

@@ -210,6 +210,40 @@ export default function Index() {
         value={ricerca}
         onChangeText={(testo) => setRicerca(testo)}
       />
+      {/* Bottone aggiungi parcheggio — solo per utenti autenticati */}
+      {utente && (
+        <TouchableOpacity
+          style={{
+            backgroundColor: Colors.secondary,
+            padding: 12,
+            borderRadius: 8,
+            marginBottom: 16,
+            alignItems: "center",
+          }}
+          onPress={() => router.push("/aggiungi-parcheggio")}
+        >
+          <Text
+            style={{ color: Colors.white, fontWeight: "bold", fontSize: 16 }}
+          >
+            ➕ Aggiungi Parcheggio
+          </Text>
+        </TouchableOpacity>
+      )}
+      {/* Bottone parcheggio salvato */}
+      <TouchableOpacity
+        style={{
+          backgroundColor: Colors.warning,
+          padding: 12,
+          borderRadius: 8,
+          marginBottom: 16,
+          alignItems: "center",
+        }}
+        onPress={() => router.push("/parcheggio-salvato")}
+      >
+        <Text style={{ color: Colors.white, fontWeight: "bold", fontSize: 16 }}>
+          📍 Dove ho parcheggiato?
+        </Text>
+      </TouchableOpacity>
 
       <FlatList
         data={parcheggiFiltrati}
