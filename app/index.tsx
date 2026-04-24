@@ -252,7 +252,9 @@ export default function Index() {
           <CartaParcheggio
             parcheggio={item}
             onPress={() =>
-              router.push(`/dettaglio?id=${item.id}&nome=${item.nome}`)
+              router.push(
+                `/dettaglio?id=${item.id}&nome=${item.nome}&latitude=${item.latitude}&longitude=${item.longitude}`,
+              )
             }
           />
         )}

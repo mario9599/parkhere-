@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 import { Colors } from "../constants/colors";
 import { useAuth } from "../hooks/useAuth";
 import {
@@ -20,7 +21,7 @@ import {
 import { Recensione } from "../types";
 
 export default function Dettaglio() {
-  const { id, nome } = useLocalSearchParams();
+  const { id, nome, latitude, longitude } = useLocalSearchParams();
   const { utente } = useAuth();
   const [recensioni, setRecensioni] = useState<Recensione[]>([]);
   const [loading, setLoading] = useState(true);
@@ -114,6 +115,30 @@ export default function Dettaglio() {
       >
         {nome}
       </Text>
+
+      {/* ← INSERISCI QUI LA MAPPA */}
+      <MapView
+        style={{
+          width: "100%",
+          height: 200,
+          borderRadius: 12,
+          marginBottom: 16,
+        }}
+        initialRegion={{
+          latitude: parseFloat(latitude as string),
+          longitude: parseFloat(longitude as string),
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
+        }}
+      >
+        <Marker
+          coordinate={{
+            latitude: parseFloat(latitude as string),
+            longitude: parseFloat(longitude as string),
+          }}
+          title={nome as string}
+        />
+      </MapView>
 
       {/* Form recensione — solo per utenti autenticati */}
       {utente ? (
