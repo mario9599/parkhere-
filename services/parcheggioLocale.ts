@@ -118,3 +118,34 @@ export const tempoRimanente = (scadeAlle: number) => {
   const secondi = Math.floor((msRimanenti / 1000) % 60);
   return { ore, minuti, secondi, totaleMs: msRimanenti };
 };
+
+// Prolunga la durata del parcheggio
+export const prolungaParcheggio = async (
+  minutiExtra: number,
+): Promise<void> => {
+  const data = await AsyncStorage.getItem(CHIAVE);
+  if (!data) return;
+
+  const parcheggio: ParcheggioLocale = JSON.parse(data);
+  const ora = Date.now();
+
+  // Se scaduto riparte da adesso, altrimenti aggiunge al tempo rimanente
+  const nuovaScadenza =
+    parcheggio.scadeAlle > ora
+      ? parcheggio.scadeAlle + minutiExtra * 60 * 1000
+      : ora + minutiExtra * 60 * 1000;
+
+  const parcheggioAggiornato: ParcheggioLocale = {
+    ...parcheggio,
+    scadeAlle: nuovaScadenza,
+    eliminaAlle: nuovaScadenza + GRACE_PERIOD_MS,
+  };
+
+  await AsyncStorage.setItem(CHIAVE, JSON.stringify(parcheggioAggiornato));
+
+  // Riprogramma le notifiche
+  const permesso = await richiediPermessoNotifiche();
+  if (permesso) {
+    await programmaNotifiche(nuovaScadenza, parcheggio.indirizzo);
+  }
+};

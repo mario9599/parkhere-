@@ -1,60 +1,87 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Platform,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { Colors } from "../constants/colors";
-import { aggiungiParcheggio } from "../services/parcheggi";
+import {
+  aggiungiParcheggio,
+  esisteParcheggioVicino,
+} from "../services/parcheggi";
+import { getPosizioneConIndirizzo } from "../services/posizione";
 
 export default function AggiungiParcheggio() {
   const [nome, setNome] = useState("");
   const [indirizzo, setIndirizzo] = useState("");
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
   const [gratuito, setGratuito] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [loadingPosizione, setLoadingPosizione] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
 
+  // Prende la posizione GPS automaticamente
+  const handlePrendiPosizione = async () => {
+    try {
+      setLoadingPosizione(true);
+      setErrore(null);
+      const { latitude, longitude, indirizzo } =
+        await getPosizioneConIndirizzo();
+      setLatitude(latitude);
+      setLongitude(longitude);
+      setIndirizzo(indirizzo);
+
+      // Imposta automaticamente il nome con l'indirizzo rilevato
+      if (!nome.trim()) {
+        setNome(`Parcheggio ${indirizzo}`);
+      }
+    } catch (err) {
+      setErrore(err.message);
+    } finally {
+      setLoadingPosizione(false);
+    }
+  };
+
   const handleAggiungi = async () => {
-    // Validazione
     if (!nome.trim()) {
       setErrore("Il nome è obbligatorio");
       return;
     }
-    if (!indirizzo.trim()) {
-      setErrore("L'indirizzo è obbligatorio");
-      return;
-    }
-    if (!latitude.trim() || !longitude.trim()) {
-      setErrore("Le coordinate sono obbligatorie");
-      return;
-    }
-    if (isNaN(parseFloat(latitude)) || isNaN(parseFloat(longitude))) {
-      setErrore("Le coordinate devono essere numeri validi");
+    if (!latitude || !longitude) {
+      setErrore("Devi rilevare la posizione GPS");
       return;
     }
 
     try {
       setLoading(true);
       setErrore(null);
+
+      // ✅ Controlla se esiste già un parcheggio nelle vicinanze
+      const esiste = await esisteParcheggioVicino(latitude, longitude);
+      if (esiste) {
+        setErrore(
+          "Esiste già un parcheggio in questa zona — non puoi aggiungerne un altro a meno di 50 metri",
+        );
+        return;
+      }
+
       await aggiungiParcheggio({
         nome: nome.trim(),
         indirizzo: indirizzo.trim(),
-        latitude: parseFloat(latitude),
-        longitude: parseFloat(longitude),
+        latitude,
+        longitude,
         gratuito,
         valutazione: 0,
         numero_recensioni: 0,
       });
 
-      // Successo
       if (Platform.OS === "web") {
         window.alert("Parcheggio aggiunto con successo! ✅");
         router.replace("/");
@@ -110,7 +137,7 @@ export default function AggiungiParcheggio() {
           onChangeText={setNome}
         />
 
-        {/* Indirizzo */}
+        {/* Posizione GPS */}
         <Text
           style={{
             fontSize: 14,
@@ -119,66 +146,53 @@ export default function AggiungiParcheggio() {
             color: Colors.black,
           }}
         >
-          Indirizzo *
+          Posizione *
         </Text>
-        <TextInput
-          style={{
-            backgroundColor: Colors.white,
-            borderWidth: 1,
-            borderColor: Colors.lightGray,
-            borderRadius: 8,
-            padding: 12,
-            marginBottom: 16,
-            fontSize: 16,
-          }}
-          placeholder="Es. Via Roma 1, Milano"
-          value={indirizzo}
-          onChangeText={setIndirizzo}
-        />
 
-        {/* Coordinate */}
-        <Text
+        {/* Bottone rileva posizione */}
+        <TouchableOpacity
           style={{
-            fontSize: 14,
-            fontWeight: "bold",
-            marginBottom: 6,
-            color: Colors.black,
+            backgroundColor: loadingPosizione ? Colors.gray : Colors.primary,
+            padding: 12,
+            borderRadius: 8,
+            marginBottom: 8,
+            alignItems: "center",
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: 8,
           }}
+          onPress={handlePrendiPosizione}
+          disabled={loadingPosizione}
         >
-          Coordinate GPS *
-        </Text>
-        <View style={{ flexDirection: "row", gap: 8, marginBottom: 16 }}>
-          <TextInput
+          {loadingPosizione ? (
+            <ActivityIndicator color={Colors.white} />
+          ) : (
+            <Text style={{ color: Colors.white, fontWeight: "bold" }}>
+              📍 {latitude ? "Aggiorna posizione" : "Rileva posizione GPS"}
+            </Text>
+          )}
+        </TouchableOpacity>
+
+        {/* Mostra indirizzo rilevato */}
+        {latitude && longitude && (
+          <View
             style={{
-              flex: 1,
               backgroundColor: Colors.white,
-              borderWidth: 1,
-              borderColor: Colors.lightGray,
-              borderRadius: 8,
               padding: 12,
-              fontSize: 16,
-            }}
-            placeholder="Latitudine"
-            value={latitude}
-            onChangeText={setLatitude}
-            keyboardType="decimal-pad"
-          />
-          <TextInput
-            style={{
-              flex: 1,
-              backgroundColor: Colors.white,
-              borderWidth: 1,
-              borderColor: Colors.lightGray,
               borderRadius: 8,
-              padding: 12,
-              fontSize: 16,
+              marginBottom: 16,
+              borderLeftWidth: 4,
+              borderLeftColor: Colors.secondary,
             }}
-            placeholder="Longitudine"
-            value={longitude}
-            onChangeText={setLongitude}
-            keyboardType="decimal-pad"
-          />
-        </View>
+          >
+            <Text style={{ fontSize: 14, color: Colors.black }}>
+              📍 {indirizzo}
+            </Text>
+            <Text style={{ fontSize: 12, color: Colors.gray, marginTop: 4 }}>
+              {latitude.toFixed(6)}, {longitude.toFixed(6)}
+            </Text>
+          </View>
+        )}
 
         {/* Gratuito/Pagamento */}
         <Text

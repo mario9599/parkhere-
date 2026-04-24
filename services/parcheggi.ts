@@ -57,3 +57,39 @@ export const eliminaRecensione = async (
 
   if (error) throw new Error(error.message);
 };
+// Controlla se esiste già un parcheggio nelle vicinanze (raggio 50 metri)
+export const esisteParcheggioVicino = async (
+  latitude: number,
+  longitude: number,
+): Promise<boolean> => {
+  const { data, error } = await supabase
+    .from("parcheggi")
+    .select("id, latitude, longitude");
+
+  if (error) throw new Error(error.message);
+
+  // Calcola la distanza in metri tra due coordinate
+  const distanza = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number => {
+    const R = 6371000; // raggio della terra in metri
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  // Controlla se qualche parcheggio è entro 50 metri
+  return data.some(
+    (p) => distanza(latitude, longitude, p.latitude, p.longitude) < 50,
+  );
+};

@@ -12,6 +12,8 @@ import {
 import { Colors } from "../constants/colors";
 import { useParcheggioLocale } from "../hooks/useParcheggioLocale";
 
+import { getPosizioneConIndirizzo } from "../services/posizione";
+
 const DURATE = [
   { label: "1 min", valore: 1 },
   { label: "10 min", valore: 10 },
@@ -22,14 +24,26 @@ const DURATE = [
   { label: "5 ore", valore: 300 },
 ];
 
+// Aggiungi in cima con le altre costanti
+const PROLUNGHE = [
+  { label: "+15 min", valore: 15 },
+  { label: "+30 min", valore: 30 },
+  { label: "+1 ora", valore: 60 },
+  { label: "+2 ore", valore: 120 },
+];
+
 export default function ParcheggioSalvato() {
-  const { parcheggio, loading, tempo, salva, elimina } = useParcheggioLocale();
+  const { parcheggio, loading, tempo, salva, elimina, prolunga } =
+    useParcheggioLocale();
   const [mostraDettaglio, setMostraDettaglio] = useState(false);
   const [indirizzo, setIndirizzo] = useState("");
   const [note, setNote] = useState("");
   const [durata, setDurata] = useState(60);
   const [salvando, setSalvando] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
+  const [loadingPosizione, setLoadingPosizione] = useState(false);
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
 
   const pad = (n: number) => n.toString().padStart(2, "0");
 
@@ -43,15 +57,21 @@ export default function ParcheggioSalvato() {
 
   const handleSalva = async () => {
     if (!indirizzo.trim()) {
-      setErrore("L'indirizzo è obbligatorio");
+      setErrore("Devi rilevare la posizione GPS");
+      return;
+    }
+    if (!latitude || !longitude) {
+      setErrore("Devi rilevare la posizione GPS");
       return;
     }
     try {
       setSalvando(true);
       setErrore(null);
-      await salva(45.4654, 9.1859, indirizzo.trim(), note.trim(), durata);
+      await salva(latitude, longitude, indirizzo.trim(), note.trim(), durata);
       setIndirizzo("");
       setNote("");
+      setLatitude(null);
+      setLongitude(null);
     } catch (err) {
       setErrore(err.message);
     } finally {
@@ -82,6 +102,24 @@ export default function ParcheggioSalvato() {
           },
         ],
       );
+    }
+  };
+
+  const handlePrendiPosizione = async () => {
+    try {
+      setLoadingPosizione(true);
+      const {
+        latitude,
+        longitude,
+        indirizzo: indirizzoRilevato,
+      } = await getPosizioneConIndirizzo();
+      setLatitude(latitude);
+      setLongitude(longitude);
+      setIndirizzo(indirizzoRilevato);
+    } catch (err) {
+      setErrore(err.message);
+    } finally {
+      setLoadingPosizione(false);
     }
   };
 
@@ -175,6 +213,56 @@ export default function ParcheggioSalvato() {
             <Text style={{ fontSize: 12, color: Colors.gray, marginTop: 8 }}>
               Salvato alle {new Date(parcheggio.savedAt).toLocaleTimeString()}
             </Text>
+          </View>
+
+          {/* Prolunga parcheggio */}
+          <View
+            style={{
+              backgroundColor: Colors.white,
+              padding: 16,
+              borderRadius: 12,
+              marginBottom: 16,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "bold",
+                marginBottom: 8,
+                color: Colors.black,
+              }}
+            >
+              ⏰ Prolunga parcheggio
+            </Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+              {PROLUNGHE.map((p) => (
+                <TouchableOpacity
+                  key={p.valore}
+                  style={{
+                    padding: 10,
+                    borderRadius: 8,
+                    backgroundColor: Colors.primary,
+                    flex: 1,
+                    alignItems: "center",
+                  }}
+                  onPress={async () => {
+                    await prolunga(p.valore);
+                    if (Platform.OS === "web") {
+                      window.alert(`Parcheggio prolungato di ${p.label}! ✅`);
+                    } else {
+                      Alert.alert(
+                        "Prolungato! ✅",
+                        `Parcheggio prolungato di ${p.label}`,
+                      );
+                    }
+                  }}
+                >
+                  <Text style={{ color: Colors.white, fontWeight: "bold" }}>
+                    {p.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
           {/* Bottone annulla parcheggio */}
@@ -286,7 +374,7 @@ export default function ParcheggioSalvato() {
               Nessun parcheggio salvato — salvane uno!
             </Text>
 
-            {/* Indirizzo */}
+            {/* Posizione GPS */}
             <Text
               style={{
                 fontSize: 14,
@@ -295,22 +383,52 @@ export default function ParcheggioSalvato() {
                 color: Colors.black,
               }}
             >
-              Indirizzo *
+              Posizione *
             </Text>
-            <TextInput
+            <TouchableOpacity
               style={{
-                backgroundColor: Colors.white,
-                borderWidth: 1,
-                borderColor: Colors.lightGray,
-                borderRadius: 8,
+                backgroundColor: loadingPosizione
+                  ? Colors.gray
+                  : Colors.primary,
                 padding: 12,
-                marginBottom: 16,
-                fontSize: 16,
+                borderRadius: 8,
+                marginBottom: 8,
+                alignItems: "center",
               }}
-              placeholder="Es. Via Roma 1, Milano"
-              value={indirizzo}
-              onChangeText={setIndirizzo}
-            />
+              onPress={handlePrendiPosizione}
+              disabled={loadingPosizione}
+            >
+              {loadingPosizione ? (
+                <ActivityIndicator color={Colors.white} />
+              ) : (
+                <Text style={{ color: Colors.white, fontWeight: "bold" }}>
+                  📍 {latitude ? "Aggiorna posizione" : "Rileva posizione GPS"}
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Mostra indirizzo rilevato */}
+            {latitude && longitude && (
+              <View
+                style={{
+                  backgroundColor: Colors.white,
+                  padding: 12,
+                  borderRadius: 8,
+                  marginBottom: 16,
+                  borderLeftWidth: 4,
+                  borderLeftColor: Colors.secondary,
+                }}
+              >
+                <Text style={{ fontSize: 14, color: Colors.black }}>
+                  📍 {indirizzo}
+                </Text>
+                <Text
+                  style={{ fontSize: 12, color: Colors.gray, marginTop: 4 }}
+                >
+                  {latitude.toFixed(6)}, {longitude.toFixed(6)}
+                </Text>
+              </View>
+            )}
 
             {/* Note */}
             <Text

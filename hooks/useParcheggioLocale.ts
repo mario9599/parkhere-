@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import {
-    eliminaParcheggioSalvato,
-    getParcheggioSalvato,
-    salvaParcheggio,
-    tempoRimanente,
+  eliminaParcheggioSalvato,
+  getParcheggioSalvato,
+  prolungaParcheggio,
+  salvaParcheggio,
+  tempoRimanente,
 } from "../services/parcheggioLocale";
 import { ParcheggioLocale } from "../types";
 
@@ -63,7 +64,9 @@ export const useParcheggioLocale = () => {
 
       // Se scaduto elimina automaticamente
       if (t.totaleMs <= 0) {
-        await elimina();
+        setTempo({ ore: 0, minuti: 0, secondi: 0, totaleMs: 0 });
+        // Non chiamare elimina() — ci pensa getParcheggioSalvato()
+        // che controlla eliminaAlle (10 min dopo la scadenza)
         clearInterval(intervallo);
       }
     }, 1000); // ogni secondo
@@ -71,5 +74,10 @@ export const useParcheggioLocale = () => {
     return () => clearInterval(intervallo);
   }, [parcheggio]);
 
-  return { parcheggio, loading, tempo, salva, elimina, carica };
+  const prolunga = async (minutiExtra: number) => {
+    await prolungaParcheggio(minutiExtra);
+    await carica();
+  };
+
+  return { parcheggio, loading, tempo, salva, elimina, carica, prolunga };
 };
