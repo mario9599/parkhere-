@@ -1,7 +1,9 @@
 import { Stack } from "expo-router";
-import { Colors } from "../constants/colors";
+import { ThemeProvider, useTheme } from "../context/ThemeContext";
 
-export default function Layout() {
+function AppLayout() {
+  const { Colors } = useTheme();
+
   return (
     <Stack
       screenOptions={{
@@ -10,7 +12,7 @@ export default function Layout() {
         headerTitleStyle: { fontWeight: "bold" },
       }}
     >
-      <Stack.Screen name="index" options={{ title: "ParkHere!" }} />
+      <Stack.Screen name="index" options={{ title: "🅿️ ParkApp" }} />
       <Stack.Screen
         name="dettaglio"
         options={{ title: "Dettaglio Parcheggio" }}
@@ -19,12 +21,20 @@ export default function Layout() {
       <Stack.Screen name="registrazione" options={{ title: "Registrati" }} />
       <Stack.Screen
         name="aggiungi-parcheggio"
-        options={{ title: "Aggiungi Parcheggio" }}
+        options={{ title: "➕ Aggiungi Parcheggio" }}
       />
       <Stack.Screen
         name="parcheggio-salvato"
-        options={{ title: "Il mio parcheggio", headerBackVisible: true }}
+        options={{ title: "📍 Il mio parcheggio" }}
       />
     </Stack>
+  );
+}
+
+export default function Layout() {
+  return (
+    <ThemeProvider>
+      <AppLayout />
+    </ThemeProvider>
   );
 }
