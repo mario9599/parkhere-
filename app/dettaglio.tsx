@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -5,13 +6,15 @@ import {
   Alert,
   FlatList,
   Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import { Colors } from "../constants/colors";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../hooks/useAuth";
 import {
   aggiungiRecensioni,
@@ -21,6 +24,8 @@ import {
 import { Recensione } from "../types";
 
 export default function Dettaglio() {
+  const { Colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const { id, nome, latitude, longitude } = useLocalSearchParams();
   const { utente } = useAuth();
   const [recensioni, setRecensioni] = useState<Recensione[]>([]);
@@ -64,10 +69,8 @@ export default function Dettaglio() {
     }
   };
 
-  // Chiede conferma prima di eliminare
   const handleEliminaRecensione = async (recensioneId: string) => {
     if (Platform.OS === "web") {
-      // Sul web usa window.confirm
       const conferma = window.confirm(
         "Sei sicuro di voler eliminare questa recensione?",
       );
@@ -80,7 +83,6 @@ export default function Dettaglio() {
         }
       }
     } else {
-      // Su mobile usa Alert nativo
       Alert.alert(
         "Elimina recensione",
         "Sei sicuro di voler eliminare questa recensione?",
@@ -104,185 +106,363 @@ export default function Dettaglio() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.background, padding: 16 }}>
-      <Text
+    <View style={{ flex: 1, backgroundColor: Colors.primary }}>
+      {/* Header colorato */}
+      <View
         style={{
-          fontSize: 24,
-          fontWeight: "bold",
-          marginBottom: 16,
-          color: Colors.black,
+          paddingTop: insets.top + 16,
+          paddingHorizontal: 16,
+          paddingBottom: 24,
         }}
       >
-        {nome}
-      </Text>
-
-      {/* ← INSERISCI QUI LA MAPPA */}
-      <MapView
-        style={{
-          width: "100%",
-          height: 200,
-          borderRadius: 12,
-          marginBottom: 16,
-        }}
-        initialRegion={{
-          latitude: parseFloat(latitude as string),
-          longitude: parseFloat(longitude as string),
-          latitudeDelta: 0.005,
-          longitudeDelta: 0.005,
-        }}
-      >
-        <Marker
-          coordinate={{
-            latitude: parseFloat(latitude as string),
-            longitude: parseFloat(longitude as string),
+        {/* Bottone indietro */}
+        {/*<TouchableOpacity
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 4,
+            marginBottom: 16,
           }}
-          title={nome as string}
-        />
-      </MapView>
+          onPress={() => router.back()}
+        >
+          <Ionicons name="chevron-back" size={20} color={Colors.white} />
+          <Text
+            style={{ color: Colors.white, fontSize: 15, fontWeight: "600" }}
+          >
+            Indietro
+          </Text>
+        </TouchableOpacity> */}
 
-      {/* Form recensione — solo per utenti autenticati */}
-      {utente ? (
+        <Text
+          style={{
+            fontSize: 26,
+            fontWeight: "800",
+            color: Colors.white,
+            letterSpacing: -0.5,
+          }}
+        >
+          {nome}
+        </Text>
         <View
           style={{
-            backgroundColor: Colors.white,
-            padding: 16,
-            borderRadius: 12,
-            marginBottom: 16,
-          }}
-        >
-          <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 8 }}>
-            Lascia una recensione
-          </Text>
-          <TextInput
-            style={{
-              borderWidth: 1,
-              borderColor: Colors.lightGray,
-              borderRadius: 8,
-              padding: 12,
-              marginBottom: 8,
-              minHeight: 80,
-            }}
-            placeholder="Scrivi la tua recensione..."
-            value={testo}
-            onChangeText={setTesto}
-            multiline
-          />
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <View style={{ flexDirection: "row", gap: 8 }}>
-              {[1, 2, 3, 4, 5].map((v) => (
-                <TouchableOpacity key={v} onPress={() => setValutazione(v)}>
-                  <Text style={{ fontSize: 24 }}>
-                    {v <= valutazione ? "⭐" : "☆"}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            <TouchableOpacity
-              style={{
-                backgroundColor: invio ? Colors.gray : Colors.primary,
-                padding: 12,
-                borderRadius: 8,
-              }}
-              onPress={async () => {
-                await inviaRecensione();
-                router.dismissAll();
-              }}
-              disabled={invio}
-            >
-              <Text style={{ color: Colors.white, fontWeight: "bold" }}>
-                {invio ? "Invio..." : "Invia"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      ) : (
-        // Messaggio per utenti non autenticati
-        <TouchableOpacity
-          style={{
-            backgroundColor: Colors.primary,
-            padding: 12,
-            borderRadius: 8,
-            marginBottom: 16,
+            flexDirection: "row",
             alignItems: "center",
+            gap: 4,
+            marginTop: 4,
           }}
-          onPress={() => router.push("/login")}
         >
-          <Text style={{ color: Colors.white, fontWeight: "bold" }}>
-            🔐 Accedi per lasciare una recensione
+          <Ionicons
+            name="location-outline"
+            size={14}
+            color={Colors.white + "CC"}
+          />
+          <Text style={{ fontSize: 13, color: Colors.white + "CC" }}>
+            Visualizza posizione sulla mappa
           </Text>
-        </TouchableOpacity>
-      )}
+        </View>
+      </View>
 
-      {/* Lista recensioni */}
-      {loading ? (
-        <ActivityIndicator color={Colors.primary} />
-      ) : recensioni.length === 0 ? (
-        <Text
-          style={{ color: Colors.gray, textAlign: "center", marginTop: 16 }}
+      {/* Card bianca */}
+      <ScrollView
+        style={{
+          flex: 1,
+          backgroundColor: Colors.background,
+          borderTopLeftRadius: 28,
+          borderTopRightRadius: 28,
+        }}
+        contentContainerStyle={{ paddingBottom: 32 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Mappa */}
+        <MapView
+          style={{
+            width: "100%",
+            height: 220,
+            borderTopLeftRadius: 28,
+            borderTopRightRadius: 28,
+          }}
+          initialRegion={{
+            latitude: parseFloat(latitude as string),
+            longitude: parseFloat(longitude as string),
+            latitudeDelta: 0.005,
+            longitudeDelta: 0.005,
+          }}
         >
-          Nessuna recensione ancora — sii il primo! 🌟
-        </Text>
-      ) : (
-        <FlatList
-          data={recensioni}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
+          <Marker
+            coordinate={{
+              latitude: parseFloat(latitude as string),
+              longitude: parseFloat(longitude as string),
+            }}
+            title={nome as string}
+          />
+        </MapView>
+
+        <View style={{ padding: 16 }}>
+          {/* Form recensione */}
+          {utente ? (
             <View
               style={{
-                backgroundColor: Colors.white,
+                backgroundColor: Colors.surface,
                 padding: 16,
-                borderRadius: 12,
-                marginBottom: 8,
+                borderRadius: 16,
+                marginBottom: 24,
+                borderWidth: 1,
+                borderColor: Colors.border,
               }}
             >
-              <View
+              <Text
                 style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginBottom: 4,
+                  fontSize: 15,
+                  fontWeight: "700",
+                  color: Colors.textPrimary,
+                  marginBottom: 12,
                 }}
               >
-                <Text style={{ fontWeight: "bold" }}>{item.nome_utente}</Text>
-                <Text style={{ color: Colors.warning }}>
-                  {"⭐".repeat(item.valutazione)}
-                </Text>
-              </View>
-              <Text style={{ color: Colors.gray, marginBottom: 8 }}>
-                {item.testo}
+                Lascia una recensione
               </Text>
 
-              {/* Bottone elimina — visibile solo all'autore */}
-              {utente && utente.id === item.utente_id && (
-                <TouchableOpacity
+              {/* Stelle */}
+              <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
+                {[1, 2, 3, 4, 5].map((v) => (
+                  <TouchableOpacity key={v} onPress={() => setValutazione(v)}>
+                    <Ionicons
+                      name={v <= valutazione ? "star" : "star-outline"}
+                      size={28}
+                      color="#F59E0B"
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <TextInput
+                style={{
+                  backgroundColor: Colors.surfaceAlt,
+                  borderRadius: 12,
+                  padding: 14,
+                  marginBottom: 12,
+                  minHeight: 80,
+                  fontSize: 15,
+                  color: Colors.textPrimary,
+                  textAlignVertical: "top",
+                }}
+                placeholder="Scrivi la tua recensione..."
+                placeholderTextColor={Colors.textSecondary}
+                value={testo}
+                onChangeText={setTesto}
+                multiline
+              />
+
+              <TouchableOpacity
+                style={{
+                  backgroundColor: invio ? Colors.surfaceAlt : Colors.primary,
+                  padding: 14,
+                  borderRadius: 12,
+                  alignItems: "center",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  gap: 8,
+                }}
+                onPress={async () => {
+                  await inviaRecensione();
+                  router.dismissAll();
+                }}
+                disabled={invio}
+              >
+                {invio ? (
+                  <ActivityIndicator color={Colors.primary} />
+                ) : (
+                  <>
+                    <Ionicons
+                      name="send-outline"
+                      size={16}
+                      color={Colors.white}
+                    />
+                    <Text style={{ color: Colors.white, fontWeight: "700" }}>
+                      Invia recensione
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={{
+                backgroundColor: Colors.primary + "15",
+                padding: 16,
+                borderRadius: 16,
+                marginBottom: 24,
+                alignItems: "center",
+                flexDirection: "row",
+                justifyContent: "center",
+                gap: 8,
+                borderWidth: 1,
+                borderColor: Colors.primary + "30",
+              }}
+              onPress={() => router.push("/login")}
+            >
+              <Ionicons
+                name="lock-closed-outline"
+                size={18}
+                color={Colors.primary}
+              />
+              <Text style={{ color: Colors.primary, fontWeight: "700" }}>
+                Accedi per lasciare una recensione
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Sezione recensioni */}
+          <Text
+            style={{
+              fontSize: 12,
+              fontWeight: "700",
+              color: Colors.textSecondary,
+              marginBottom: 12,
+              letterSpacing: 0.5,
+            }}
+          >
+            RECENSIONI
+          </Text>
+
+          {loading ? (
+            <ActivityIndicator color={Colors.primary} />
+          ) : recensioni.length === 0 ? (
+            <View style={{ alignItems: "center", padding: 24 }}>
+              <Ionicons
+                name="chatbubble-outline"
+                size={40}
+                color={Colors.textSecondary}
+              />
+              <Text
+                style={{
+                  color: Colors.textSecondary,
+                  marginTop: 8,
+                  fontSize: 14,
+                }}
+              >
+                Nessuna recensione ancora — sii il primo!
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={recensioni}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+              renderItem={({ item }) => (
+                <View
                   style={{
-                    alignSelf: "flex-end",
-                    backgroundColor: Colors.danger,
-                    padding: 6,
-                    borderRadius: 6,
+                    backgroundColor: Colors.surface,
+                    padding: 16,
+                    borderRadius: 16,
+                    marginBottom: 10,
+                    borderWidth: 1,
+                    borderColor: Colors.border,
                   }}
-                  onPress={() => handleEliminaRecensione(item.id)}
                 >
-                  <Text
+                  <View
                     style={{
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: "bold",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: 8,
                     }}
                   >
-                    🗑️ Elimina
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
+                    >
+                      <View
+                        style={{
+                          backgroundColor: Colors.primary + "20",
+                          width: 32,
+                          height: 32,
+                          borderRadius: 16,
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 13,
+                            fontWeight: "700",
+                            color: Colors.primary,
+                          }}
+                        >
+                          {item.nome_utente.charAt(0).toUpperCase()}
+                        </Text>
+                      </View>
+                      <Text
+                        style={{
+                          fontWeight: "700",
+                          color: Colors.textPrimary,
+                          fontSize: 14,
+                        }}
+                      >
+                        {item.nome_utente}
+                      </Text>
+                    </View>
+                    <View style={{ flexDirection: "row", gap: 2 }}>
+                      {[1, 2, 3, 4, 5].map((v) => (
+                        <Ionicons
+                          key={v}
+                          name={v <= item.valutazione ? "star" : "star-outline"}
+                          size={14}
+                          color="#F59E0B"
+                        />
+                      ))}
+                    </View>
+                  </View>
+
+                  <Text
+                    style={{
+                      color: Colors.textSecondary,
+                      fontSize: 14,
+                      lineHeight: 20,
+                    }}
+                  >
+                    {item.testo}
                   </Text>
-                </TouchableOpacity>
+
+                  {utente && utente.id === item.utente_id && (
+                    <TouchableOpacity
+                      style={{
+                        alignSelf: "flex-end",
+                        marginTop: 8,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 4,
+                        backgroundColor: Colors.danger + "15",
+                        paddingHorizontal: 10,
+                        paddingVertical: 6,
+                        borderRadius: 8,
+                      }}
+                      onPress={() => handleEliminaRecensione(item.id)}
+                    >
+                      <Ionicons
+                        name="trash-outline"
+                        size={14}
+                        color={Colors.danger}
+                      />
+                      <Text
+                        style={{
+                          color: Colors.danger,
+                          fontSize: 12,
+                          fontWeight: "600",
+                        }}
+                      >
+                        Elimina
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               )}
-            </View>
+            />
           )}
-        />
-      )}
+        </View>
+      </ScrollView>
     </View>
   );
 }

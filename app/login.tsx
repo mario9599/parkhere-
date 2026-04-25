@@ -1,16 +1,22 @@
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { Colors } from "../constants/colors";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTheme } from "../context/ThemeContext";
 import { accedi } from "../services/auth";
 
 export default function Login() {
+  const { Colors, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +28,7 @@ export default function Login() {
       setLoading(true);
       setErrore(null);
       await accedi(email, password);
-      router.replace("/");
+      router.dismissAll();
     } catch (err) {
       setErrore(err.message);
     } finally {
@@ -31,133 +37,209 @@ export default function Login() {
   };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        padding: 24,
-        backgroundColor: Colors.background,
-      }}
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: Colors.primary }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <Text
+      {/* Sfondo colorato in alto */}
+      <View
         style={{
-          fontSize: 32,
-          fontWeight: "bold",
-          marginBottom: 8,
-          color: Colors.primary,
+          paddingTop: insets.top + 40,
+          paddingHorizontal: 24,
+          paddingBottom: 40,
         }}
       >
-        Bentornato! 👋
-      </Text>
-      <Text style={{ fontSize: 16, color: Colors.gray, marginBottom: 32 }}>
-        Accedi per lasciare recensioni
-      </Text>
-
-      {/* Campo email */}
-      <Text
-        style={{
-          fontSize: 14,
-          fontWeight: "bold",
-          marginBottom: 6,
-          color: Colors.black,
-        }}
-      >
-        Email
-      </Text>
-      <TextInput
-        style={{
-          backgroundColor: Colors.white,
-          borderWidth: 1,
-          borderColor: Colors.lightGray,
-          borderRadius: 8,
-          padding: 12,
-          marginBottom: 16,
-          fontSize: 16,
-        }}
-        placeholder="mario@email.com"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-
-      {/* Campo password */}
-      <Text
-        style={{
-          fontSize: 14,
-          fontWeight: "bold",
-          marginBottom: 6,
-          color: Colors.black,
-        }}
-      >
-        Password
-      </Text>
-      <View style={{ position: "relative", marginBottom: 24 }}>
-        <TextInput
-          style={{
-            backgroundColor: Colors.white,
-            borderWidth: 1,
-            borderColor: Colors.lightGray,
-            borderRadius: 8,
-            padding: 12,
-            fontSize: 16,
-            paddingRight: 50,
-          }}
-          placeholder="La tua password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={!mostraPassword}
-        />
-        <TouchableOpacity
-          style={{ position: "absolute", right: 12, top: 12 }}
-          onPress={() => setMostraPassword(!mostraPassword)}
-        >
-          <Text style={{ fontSize: 20 }}>{mostraPassword ? "🙈" : "👁️"}</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Errore */}
-      {errore && (
         <Text
           style={{
-            color: Colors.danger,
-            marginBottom: 16,
-            textAlign: "center",
+            fontSize: 36,
+            fontWeight: "800",
+            color: Colors.white,
+            letterSpacing: -1,
           }}
         >
-          ❌ {errore}
+          ParkHere
         </Text>
-      )}
+        <Text
+          style={{ fontSize: 16, color: Colors.white + "CC", marginTop: 4 }}
+        >
+          Bentornato
+        </Text>
+      </View>
 
-      {/* Bottone login */}
-      <TouchableOpacity
+      {/* Card bianca in basso */}
+      <View
         style={{
-          backgroundColor: loading ? Colors.gray : Colors.primary,
-          padding: 16,
-          borderRadius: 8,
-          alignItems: "center",
-          marginBottom: 16,
+          flex: 1,
+          backgroundColor: Colors.background,
+          borderTopLeftRadius: 28,
+          borderTopRightRadius: 28,
+          padding: 24,
+          paddingTop: 32,
         }}
-        onPress={handleLogin}
-        disabled={loading}
       >
-        {loading ? (
-          <ActivityIndicator color={Colors.white} />
-        ) : (
-          <Text
-            style={{ color: Colors.white, fontWeight: "bold", fontSize: 16 }}
-          >
-            Accedi
-          </Text>
-        )}
-      </TouchableOpacity>
-
-      {/* Link registrazione */}
-      <TouchableOpacity onPress={() => router.push("/registrazione")}>
-        <Text style={{ textAlign: "center", color: Colors.primary }}>
-          Non hai un account? Registrati
+        {/* Campo email */}
+        <Text
+          style={{
+            fontSize: 12,
+            fontWeight: "700",
+            color: Colors.textSecondary,
+            marginBottom: 8,
+            letterSpacing: 0.5,
+          }}
+        >
+          EMAIL
         </Text>
-      </TouchableOpacity>
-    </View>
+        <View
+          style={{
+            backgroundColor: Colors.surface,
+            borderRadius: 14,
+            borderWidth: 1,
+            borderColor: Colors.border,
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: 14,
+            marginBottom: 16,
+          }}
+        >
+          <Ionicons
+            name="mail-outline"
+            size={18}
+            color={Colors.textSecondary}
+          />
+          <TextInput
+            style={{
+              flex: 1,
+              padding: 18,
+              fontSize: 15,
+              color: Colors.textPrimary,
+              marginLeft: 8,
+            }}
+            placeholder="La tua mail"
+            placeholderTextColor={Colors.textSecondary}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
+
+        {/* Campo password */}
+        <Text
+          style={{
+            fontSize: 12,
+            fontWeight: "700",
+            color: Colors.textSecondary,
+            marginBottom: 8,
+            letterSpacing: 0.5,
+          }}
+        >
+          PASSWORD
+        </Text>
+        <View
+          style={{
+            backgroundColor: Colors.surface,
+            borderRadius: 14,
+            borderWidth: 1,
+            borderColor: Colors.border,
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: 14,
+            marginBottom: 32,
+          }}
+        >
+          <Ionicons
+            name="lock-closed-outline"
+            size={18}
+            color={Colors.textSecondary}
+          />
+          <TextInput
+            style={{
+              flex: 1,
+              padding: 18,
+              fontSize: 15,
+              color: Colors.textPrimary,
+              marginLeft: 8,
+            }}
+            placeholder="La tua password"
+            placeholderTextColor={Colors.textSecondary}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!mostraPassword}
+          />
+          <TouchableOpacity onPress={() => setMostraPassword(!mostraPassword)}>
+            <Ionicons
+              name={mostraPassword ? "eye-off-outline" : "eye-outline"}
+              size={20}
+              color={Colors.textSecondary}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Errore */}
+        {errore && (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 16,
+              backgroundColor: Colors.danger + "15",
+              padding: 12,
+              borderRadius: 12,
+            }}
+          >
+            <Ionicons
+              name="alert-circle-outline"
+              size={16}
+              color={Colors.danger}
+            />
+            <Text style={{ color: Colors.danger, fontSize: 14, flex: 1 }}>
+              {errore}
+            </Text>
+          </View>
+        )}
+
+        {/* Bottone login */}
+        <TouchableOpacity
+          style={{
+            backgroundColor: loading ? Colors.surfaceAlt : Colors.primary,
+            padding: 18,
+            borderRadius: 16,
+            alignItems: "center",
+            marginBottom: 16,
+            shadowColor: Colors.primary,
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            shadowOffset: { width: 0, height: 4 },
+            elevation: 4,
+          }}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={Colors.white} />
+          ) : (
+            <Text
+              style={{ color: Colors.white, fontWeight: "700", fontSize: 16 }}
+            >
+              Accedi
+            </Text>
+          )}
+        </TouchableOpacity>
+
+        {/* Link registrazione */}
+        <TouchableOpacity
+          style={{ alignItems: "center", padding: 8 }}
+          onPress={() => router.push("/registrazione")}
+        >
+          <Text style={{ color: Colors.textSecondary, fontSize: 14 }}>
+            Non hai un account?{" "}
+            <Text style={{ color: Colors.primary, fontWeight: "700" }}>
+              Registrati
+            </Text>
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }

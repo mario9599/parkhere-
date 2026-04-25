@@ -16,10 +16,16 @@ function AppLayout() {
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
         name="dettaglio"
-        options={{ title: "Dettaglio Parcheggio" }}
+        options={{ title: "Dettaglio Parcheggio", headerShown: false }}
       />
-      <Stack.Screen name="login" options={{ title: "Accedi" }} />
-      <Stack.Screen name="registrazione" options={{ title: "Registrati" }} />
+      <Stack.Screen
+        name="login"
+        options={{ title: "Accedi", headerShown: false }}
+      />
+      <Stack.Screen
+        name="registrazione"
+        options={{ title: "Registrati", headerShown: false }}
+      />
       <Stack.Screen
         name="aggiungi-parcheggio"
         options={{ title: "Aggiungi Parcheggio" }}
