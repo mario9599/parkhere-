@@ -7,12 +7,13 @@ function AppLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: Colors.primary },
-        headerTintColor: Colors.white,
+        headerStyle: { backgroundColor: Colors.surface },
+        headerTintColor: Colors.textPrimary,
         headerTitleStyle: { fontWeight: "bold" },
+        headerShadowVisible: false,
       }}
     >
-      <Stack.Screen name="index" options={{ title: "🅿️ ParkApp" }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
         name="dettaglio"
         options={{ title: "Dettaglio Parcheggio" }}
@@ -21,11 +22,7 @@ function AppLayout() {
       <Stack.Screen name="registrazione" options={{ title: "Registrati" }} />
       <Stack.Screen
         name="aggiungi-parcheggio"
-        options={{ title: "➕ Aggiungi Parcheggio" }}
-      />
-      <Stack.Screen
-        name="parcheggio-salvato"
-        options={{ title: "📍 Il mio parcheggio" }}
+        options={{ title: "Aggiungi Parcheggio" }}
       />
     </Stack>
   );
