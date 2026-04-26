@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -10,7 +11,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Colors } from "../constants/colors";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTheme } from "../context/ThemeContext";
 import {
   aggiungiParcheggio,
   esisteParcheggioVicino,
@@ -18,6 +20,8 @@ import {
 import { getPosizioneConIndirizzo } from "../services/posizione";
 
 export default function AggiungiParcheggio() {
+  const { Colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [nome, setNome] = useState("");
   const [indirizzo, setIndirizzo] = useState("");
   const [latitude, setLatitude] = useState<number | null>(null);
@@ -27,7 +31,6 @@ export default function AggiungiParcheggio() {
   const [loadingPosizione, setLoadingPosizione] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
 
-  // Prende la posizione GPS automaticamente
   const handlePrendiPosizione = async () => {
     try {
       setLoadingPosizione(true);
@@ -37,8 +40,6 @@ export default function AggiungiParcheggio() {
       setLatitude(latitude);
       setLongitude(longitude);
       setIndirizzo(indirizzo);
-
-      // Imposta automaticamente il nome con l'indirizzo rilevato
       if (!nome.trim()) {
         setNome(`Parcheggio ${indirizzo}`);
       }
@@ -58,12 +59,9 @@ export default function AggiungiParcheggio() {
       setErrore("Devi rilevare la posizione GPS");
       return;
     }
-
     try {
       setLoading(true);
       setErrore(null);
-
-      // ✅ Controlla se esiste già un parcheggio nelle vicinanze
       const esiste = await esisteParcheggioVicino(latitude, longitude);
       if (esiste) {
         setErrore(
@@ -71,7 +69,6 @@ export default function AggiungiParcheggio() {
         );
         return;
       }
-
       await aggiungiParcheggio({
         nome: nome.trim(),
         indirizzo: indirizzo.trim(),
@@ -81,12 +78,11 @@ export default function AggiungiParcheggio() {
         valutazione: 0,
         numero_recensioni: 0,
       });
-
       if (Platform.OS === "web") {
-        window.alert("Parcheggio aggiunto con successo! ✅");
+        window.alert("Parcheggio aggiunto con successo!");
         router.replace("/");
       } else {
-        Alert.alert("Successo! ✅", "Parcheggio aggiunto con successo!", [
+        Alert.alert("Successo!", "Parcheggio aggiunto con successo!", [
           { text: "OK", onPress: () => router.replace("/") },
         ]);
       }
@@ -98,64 +94,121 @@ export default function AggiungiParcheggio() {
   };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: Colors.background }}>
-      <View style={{ padding: 16 }}>
-        <Text
+    <View style={{ flex: 1, backgroundColor: Colors.primary }}>
+      {/* Header colorato */}
+      <View
+        style={{
+          paddingTop: insets.top + 16,
+          paddingHorizontal: 16,
+          paddingBottom: 32,
+        }}
+      >
+        {/* Bottone indietro */}
+        <TouchableOpacity
           style={{
-            fontSize: 24,
-            fontWeight: "bold",
-            marginBottom: 24,
-            color: Colors.black,
-          }}
-        >
-          ➕ Nuovo Parcheggio
-        </Text>
-
-        {/* Nome */}
-        <Text
-          style={{
-            fontSize: 14,
-            fontWeight: "bold",
-            marginBottom: 6,
-            color: Colors.black,
-          }}
-        >
-          Nome parcheggio *
-        </Text>
-        <TextInput
-          style={{
-            backgroundColor: Colors.white,
-            borderWidth: 1,
-            borderColor: Colors.lightGray,
-            borderRadius: 8,
-            padding: 12,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 4,
             marginBottom: 16,
-            fontSize: 16,
           }}
-          placeholder="Es. Parcheggio Via Roma"
-          value={nome}
-          onChangeText={setNome}
-        />
+          onPress={() => router.back()}
+        >
+          <Ionicons name="chevron-back" size={20} color={Colors.white} />
+          <Text
+            style={{ color: Colors.white, fontSize: 15, fontWeight: "600" }}
+          >
+            Indietro
+          </Text>
+        </TouchableOpacity>
+
+        <Text
+          style={{
+            fontSize: 28,
+            fontWeight: "800",
+            color: Colors.white,
+            letterSpacing: -0.5,
+          }}
+        >
+          Nuovo Parcheggio
+        </Text>
+        <Text
+          style={{ fontSize: 14, color: Colors.white + "CC", marginTop: 4 }}
+        >
+          Aggiungi un parcheggio alla community
+        </Text>
+      </View>
+
+      {/* Card bianca */}
+      <ScrollView
+        style={{
+          flex: 1,
+          backgroundColor: Colors.background,
+          borderTopLeftRadius: 28,
+          borderTopRightRadius: 28,
+        }}
+        contentContainerStyle={{ padding: 24, paddingTop: 32 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Nome parcheggio */}
+        <Text
+          style={{
+            fontSize: 12,
+            fontWeight: "700",
+            color: Colors.textSecondary,
+            marginBottom: 8,
+            letterSpacing: 0.5,
+          }}
+        >
+          NOME PARCHEGGIO
+        </Text>
+        <View
+          style={{
+            backgroundColor: Colors.surface,
+            borderRadius: 14,
+            borderWidth: 1,
+            borderColor: Colors.border,
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: 14,
+            marginBottom: 20,
+          }}
+        >
+          <Ionicons name="car-outline" size={18} color={Colors.textSecondary} />
+          <TextInput
+            style={{
+              flex: 1,
+              padding: 18,
+              fontSize: 15,
+              color: Colors.textPrimary,
+              marginLeft: 8,
+            }}
+            placeholder="Es. Parcheggio Via Roma"
+            placeholderTextColor={Colors.textSecondary}
+            value={nome}
+            onChangeText={setNome}
+          />
+        </View>
 
         {/* Posizione GPS */}
         <Text
           style={{
-            fontSize: 14,
-            fontWeight: "bold",
-            marginBottom: 6,
-            color: Colors.black,
+            fontSize: 12,
+            fontWeight: "700",
+            color: Colors.textSecondary,
+            marginBottom: 8,
+            letterSpacing: 0.5,
           }}
         >
-          Posizione *
+          POSIZIONE
         </Text>
-
-        {/* Bottone rileva posizione */}
         <TouchableOpacity
           style={{
-            backgroundColor: loadingPosizione ? Colors.gray : Colors.primary,
-            padding: 12,
-            borderRadius: 8,
-            marginBottom: 8,
+            backgroundColor: loadingPosizione
+              ? Colors.surfaceAlt
+              : Colors.primary,
+            padding: 16,
+            borderRadius: 14,
+            marginBottom: 10,
             alignItems: "center",
             flexDirection: "row",
             justifyContent: "center",
@@ -165,61 +218,95 @@ export default function AggiungiParcheggio() {
           disabled={loadingPosizione}
         >
           {loadingPosizione ? (
-            <ActivityIndicator color={Colors.white} />
+            <ActivityIndicator color={Colors.primary} />
           ) : (
-            <Text style={{ color: Colors.white, fontWeight: "bold" }}>
-              📍 {latitude ? "Aggiorna posizione" : "Rileva posizione GPS"}
-            </Text>
+            <>
+              <Ionicons name="locate-outline" size={18} color={Colors.white} />
+              <Text style={{ color: Colors.white, fontWeight: "700" }}>
+                {latitude ? "Aggiorna posizione GPS" : "Rileva posizione GPS"}
+              </Text>
+            </>
           )}
         </TouchableOpacity>
 
-        {/* Mostra indirizzo rilevato */}
+        {/* Indirizzo rilevato */}
         {latitude && longitude && (
           <View
             style={{
-              backgroundColor: Colors.white,
+              backgroundColor: Colors.secondary + "15",
               padding: 12,
-              borderRadius: 8,
-              marginBottom: 16,
-              borderLeftWidth: 4,
-              borderLeftColor: Colors.secondary,
+              borderRadius: 12,
+              marginBottom: 20,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 8,
             }}
           >
-            <Text style={{ fontSize: 14, color: Colors.black }}>
-              📍 {indirizzo}
-            </Text>
-            <Text style={{ fontSize: 12, color: Colors.gray, marginTop: 4 }}>
-              {latitude.toFixed(6)}, {longitude.toFixed(6)}
-            </Text>
+            <Ionicons
+              name="checkmark-circle"
+              size={18}
+              color={Colors.secondary}
+            />
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{
+                  fontSize: 13,
+                  color: Colors.textPrimary,
+                  fontWeight: "600",
+                }}
+              >
+                {indirizzo}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 11,
+                  color: Colors.textSecondary,
+                  marginTop: 2,
+                }}
+              >
+                {latitude.toFixed(6)}, {longitude.toFixed(6)}
+              </Text>
+            </View>
           </View>
         )}
 
-        {/* Gratuito/Pagamento */}
+        {/* Tipo parcheggio */}
         <Text
           style={{
-            fontSize: 14,
-            fontWeight: "bold",
+            fontSize: 12,
+            fontWeight: "700",
+            color: Colors.textSecondary,
             marginBottom: 8,
-            color: Colors.black,
+            letterSpacing: 0.5,
           }}
         >
-          Tipo parcheggio *
+          TIPO PARCHEGGIO
         </Text>
-        <View style={{ flexDirection: "row", gap: 8, marginBottom: 24 }}>
+        <View style={{ flexDirection: "row", gap: 10, marginBottom: 28 }}>
           <TouchableOpacity
             style={{
               flex: 1,
-              padding: 12,
-              borderRadius: 8,
+              padding: 16,
+              borderRadius: 14,
               alignItems: "center",
-              backgroundColor: gratuito ? Colors.secondary : Colors.lightGray,
+              flexDirection: "row",
+              justifyContent: "center",
+              gap: 8,
+              backgroundColor: gratuito ? Colors.secondary : Colors.surface,
+              borderWidth: 2,
+              borderColor: gratuito ? Colors.secondary : Colors.border,
             }}
             onPress={() => setGratuito(true)}
           >
+            <Ionicons
+              name="checkmark-circle-outline"
+              size={18}
+              color={gratuito ? Colors.white : Colors.textSecondary}
+            />
             <Text
               style={{
-                fontWeight: "bold",
-                color: gratuito ? Colors.white : Colors.gray,
+                fontWeight: "700",
+                color: gratuito ? Colors.white : Colors.textSecondary,
               }}
             >
               Gratuito
@@ -228,17 +315,27 @@ export default function AggiungiParcheggio() {
           <TouchableOpacity
             style={{
               flex: 1,
-              padding: 12,
-              borderRadius: 8,
+              padding: 16,
+              borderRadius: 14,
               alignItems: "center",
-              backgroundColor: !gratuito ? Colors.danger : Colors.lightGray,
+              flexDirection: "row",
+              justifyContent: "center",
+              gap: 8,
+              backgroundColor: !gratuito ? Colors.danger : Colors.surface,
+              borderWidth: 2,
+              borderColor: !gratuito ? Colors.danger : Colors.border,
             }}
             onPress={() => setGratuito(false)}
           >
+            <Ionicons
+              name="card-outline"
+              size={18}
+              color={!gratuito ? Colors.white : Colors.textSecondary}
+            />
             <Text
               style={{
-                fontWeight: "bold",
-                color: !gratuito ? Colors.white : Colors.gray,
+                fontWeight: "700",
+                color: !gratuito ? Colors.white : Colors.textSecondary,
               }}
             >
               A pagamento
@@ -248,39 +345,65 @@ export default function AggiungiParcheggio() {
 
         {/* Errore */}
         {errore && (
-          <Text
+          <View
             style={{
-              color: Colors.danger,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 8,
               marginBottom: 16,
-              textAlign: "center",
+              backgroundColor: Colors.danger + "15",
+              padding: 12,
+              borderRadius: 12,
             }}
           >
-            ❌ {errore}
-          </Text>
+            <Ionicons
+              name="alert-circle-outline"
+              size={16}
+              color={Colors.danger}
+            />
+            <Text style={{ color: Colors.danger, fontSize: 14, flex: 1 }}>
+              {errore}
+            </Text>
+          </View>
         )}
 
         {/* Bottone aggiungi */}
         <TouchableOpacity
           style={{
-            backgroundColor: loading ? Colors.gray : Colors.primary,
-            padding: 16,
-            borderRadius: 8,
+            backgroundColor: loading ? Colors.surfaceAlt : Colors.primary,
+            padding: 18,
+            borderRadius: 16,
             alignItems: "center",
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: 8,
+            shadowColor: Colors.primary,
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            shadowOffset: { width: 0, height: 4 },
+            elevation: 4,
           }}
           onPress={handleAggiungi}
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color={Colors.white} />
+            <ActivityIndicator color={Colors.primary} />
           ) : (
-            <Text
-              style={{ color: Colors.white, fontWeight: "bold", fontSize: 16 }}
-            >
-              Aggiungi Parcheggio
-            </Text>
+            <>
+              <Ionicons
+                name="add-circle-outline"
+                size={20}
+                color={Colors.white}
+              />
+              <Text
+                style={{ color: Colors.white, fontWeight: "700", fontSize: 16 }}
+              >
+                Aggiungi Parcheggio
+              </Text>
+            </>
           )}
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

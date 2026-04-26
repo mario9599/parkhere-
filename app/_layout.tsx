@@ -28,7 +28,7 @@ function AppLayout() {
       />
       <Stack.Screen
         name="aggiungi-parcheggio"
-        options={{ title: "Aggiungi Parcheggio" }}
+        options={{ title: "Aggiungi Parcheggio", headerShown: false }}
       />
     </Stack>
   );

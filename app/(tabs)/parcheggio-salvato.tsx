@@ -1,13 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Platform,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -135,100 +136,94 @@ export default function ParcheggioSalvato() {
       <View
         style={{
           flex: 1,
+          backgroundColor: Colors.primary,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: Colors.background,
         }}
       >
-        <ActivityIndicator size="large" color={Colors.primary} />
+        <ActivityIndicator size="large" color={Colors.white} />
       </View>
     );
   }
 
-  return (
-    <View style={{ flex: 1, backgroundColor: Colors.background }}>
-      {/* Header */}
-      <View
-        style={{
-          backgroundColor: Colors.surface,
-          paddingHorizontal: 16,
-          paddingTop: insets.top + 8,
-          paddingBottom: 12,
-          borderBottomWidth: 1,
-          borderBottomColor: Colors.border,
-        }}
-      >
-        <Text
+  // Schermata dettaglio
+  if (parcheggio && mostraDettaglio) {
+    return (
+      <View style={{ flex: 1, backgroundColor: Colors.primary }}>
+        <View
           style={{
-            fontSize: 24,
-            fontWeight: "800",
-            color: Colors.primary,
-            letterSpacing: -0.5,
+            paddingTop: insets.top + 16,
+            paddingHorizontal: 16,
+            paddingBottom: 24,
           }}
         >
-          ParkHere
-        </Text>
-      </View>
-
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        {parcheggio && mostraDettaglio ? (
-          // Schermata dettaglio parcheggio
-          <View>
-            <TouchableOpacity
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: 16,
-                gap: 4,
-              }}
-              onPress={() => setMostraDettaglio(false)}
-            >
-              <Ionicons name="chevron-back" size={20} color={Colors.primary} />
-              <Text
-                style={{
-                  color: Colors.primary,
-                  fontSize: 15,
-                  fontWeight: "600",
-                }}
-              >
-                Torna indietro
-              </Text>
-            </TouchableOpacity>
-
+          <TouchableOpacity
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 4,
+              marginBottom: 16,
+            }}
+            onPress={() => setMostraDettaglio(false)}
+          >
+            <Ionicons name="chevron-back" size={20} color={Colors.white} />
             <Text
-              style={{
-                fontSize: 22,
-                fontWeight: "800",
-                color: Colors.textPrimary,
-                marginBottom: 16,
-              }}
+              style={{ color: Colors.white, fontSize: 15, fontWeight: "600" }}
             >
-              Il mio parcheggio
+              Indietro
             </Text>
-            {/* Mappa */}
-            <MapView
-              style={{
-                width: "100%",
-                height: 200,
-                borderRadius: 16,
-                marginBottom: 16,
-              }}
-              initialRegion={{
+          </TouchableOpacity>
+          <Text
+            style={{
+              fontSize: 26,
+              fontWeight: "800",
+              color: Colors.white,
+              letterSpacing: -0.5,
+            }}
+          >
+            Il mio parcheggio
+          </Text>
+          <Text
+            style={{ fontSize: 13, color: Colors.white + "CC", marginTop: 4 }}
+          >
+            {parcheggio.indirizzo}
+          </Text>
+        </View>
+
+        <ScrollView
+          style={{
+            flex: 1,
+            backgroundColor: Colors.background,
+            borderTopLeftRadius: 28,
+            borderTopRightRadius: 28,
+          }}
+          contentContainerStyle={{ paddingBottom: 32 }}
+        >
+          {/* Mappa */}
+          <MapView
+            style={{
+              width: "100%",
+              height: 200,
+              borderTopLeftRadius: 28,
+              borderTopRightRadius: 28,
+            }}
+            initialRegion={{
+              latitude: parcheggio.latitude,
+              longitude: parcheggio.longitude,
+              latitudeDelta: 0.005,
+              longitudeDelta: 0.005,
+            }}
+          >
+            <Marker
+              coordinate={{
                 latitude: parcheggio.latitude,
                 longitude: parcheggio.longitude,
-                latitudeDelta: 0.005,
-                longitudeDelta: 0.005,
               }}
-            >
-              <Marker
-                coordinate={{
-                  latitude: parcheggio.latitude,
-                  longitude: parcheggio.longitude,
-                }}
-                title="Il mio parcheggio"
-              />
-            </MapView>
+              title="Il mio parcheggio"
+            />
+          </MapView>
 
+          <View style={{ padding: 16 }}>
             {/* Cronometro */}
             <View
               style={{
@@ -282,6 +277,8 @@ export default function ParcheggioSalvato() {
                 padding: 16,
                 borderRadius: 16,
                 marginBottom: 16,
+                borderWidth: 1,
+                borderColor: Colors.border,
               }}
             >
               <View
@@ -411,132 +408,145 @@ export default function ParcheggioSalvato() {
               </Text>
             </TouchableOpacity>
           </View>
-        ) : parcheggio ? (
-          // Card parcheggio salvato
-          <View>
-            <Text
+        </ScrollView>
+      </View>
+    );
+  }
+
+  return (
+    <View style={{ flex: 1, backgroundColor: Colors.primary }}>
+      {/* Header colorato */}
+      <View
+        style={{
+          paddingTop: insets.top + 16,
+          paddingHorizontal: 16,
+          paddingBottom: 24,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 28,
+            fontWeight: "800",
+            color: Colors.white,
+            letterSpacing: -1,
+          }}
+        >
+          ParkHere
+        </Text>
+        <Text
+          style={{ fontSize: 14, color: Colors.white + "CC", marginTop: 4 }}
+        >
+          {parcheggio
+            ? "Il tuo parcheggio attivo"
+            : "Ricorda dove hai parcheggiato"}
+        </Text>
+      </View>
+
+      {/* Card bianca */}
+      <ScrollView
+        style={{
+          flex: 1,
+          backgroundColor: Colors.background,
+          borderTopLeftRadius: 28,
+          borderTopRightRadius: 28,
+        }}
+        contentContainerStyle={{ padding: 24, paddingTop: 28 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {parcheggio ? (
+          // Card parcheggio attivo
+          <TouchableOpacity
+            style={{
+              backgroundColor: Colors.surface,
+              padding: 16,
+              borderRadius: 16,
+              borderLeftWidth: 4,
+              borderLeftColor: isScaduto ? Colors.danger : coloreTimer(),
+              shadowColor: Colors.black,
+              shadowOpacity: 0.06,
+              shadowRadius: 8,
+              elevation: 3,
+              borderWidth: 1,
+              borderColor: Colors.border,
+            }}
+            onPress={() => setMostraDettaglio(true)}
+          >
+            <View
               style={{
-                fontSize: 22,
-                fontWeight: "800",
-                color: Colors.textPrimary,
-                marginBottom: 16,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 12,
               }}
             >
-              Il mio parcheggio
-            </Text>
+              <Ionicons
+                name="location-outline"
+                size={16}
+                color={Colors.textSecondary}
+              />
+              <Text
+                style={{
+                  fontSize: 15,
+                  fontWeight: "700",
+                  color: Colors.textPrimary,
+                  flex: 1,
+                }}
+              >
+                {parcheggio.indirizzo}
+              </Text>
+            </View>
 
-            <TouchableOpacity
+            <View
               style={{
-                backgroundColor: Colors.surface,
-                padding: 16,
-                borderRadius: 16,
-                borderLeftWidth: 4,
-                borderLeftColor: isScaduto ? Colors.danger : coloreTimer(),
-                shadowColor: Colors.black,
-                shadowOpacity: 0.06,
-                shadowRadius: 8,
-                elevation: 3,
+                backgroundColor: isScaduto ? Colors.danger : coloreTimer(),
+                padding: 10,
+                borderRadius: 10,
+                alignItems: "center",
+                marginBottom: 8,
               }}
-              onPress={() => setMostraDettaglio(true)}
             >
-              <View
+              <Text
                 style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 8,
-                  marginBottom: 12,
+                  color: Colors.white,
+                  fontWeight: "800",
+                  fontSize: 20,
+                  letterSpacing: 1,
                 }}
               >
-                <Ionicons
-                  name="location-outline"
-                  size={16}
-                  color={Colors.textSecondary}
-                />
-                <Text
-                  style={{
-                    fontSize: 15,
-                    fontWeight: "700",
-                    color: Colors.textPrimary,
-                    flex: 1,
-                  }}
-                >
-                  {parcheggio.indirizzo}
-                </Text>
-              </View>
+                {isScaduto
+                  ? "Scaduto"
+                  : `${pad(tempo.ore)}:${pad(tempo.minuti)}:${pad(tempo.secondi)}`}
+              </Text>
+            </View>
 
-              {/* Timer */}
-              <View
-                style={{
-                  backgroundColor: isScaduto ? Colors.danger : coloreTimer(),
-                  padding: 10,
-                  borderRadius: 10,
-                  alignItems: "center",
-                  marginBottom: 8,
-                }}
-              >
-                <Text
-                  style={{
-                    color: Colors.white,
-                    fontWeight: "800",
-                    fontSize: 20,
-                    letterSpacing: 1,
-                  }}
-                >
-                  {isScaduto
-                    ? "Scaduto"
-                    : `${pad(tempo.ore)}:${pad(tempo.minuti)}:${pad(tempo.secondi)}`}
-                </Text>
-              </View>
+            {parcheggio.note ? (
+              <Text style={{ fontSize: 13, color: Colors.textSecondary }}>
+                {parcheggio.note}
+              </Text>
+            ) : null}
 
-              {parcheggio.note ? (
-                <Text style={{ fontSize: 13, color: Colors.textSecondary }}>
-                  {parcheggio.note}
-                </Text>
-              ) : null}
-
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 4,
-                  marginTop: 8,
-                }}
-              >
-                <Text style={{ fontSize: 12, color: Colors.textSecondary }}>
-                  Tocca per i dettagli
-                </Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={12}
-                  color={Colors.textSecondary}
-                />
-              </View>
-            </TouchableOpacity>
-          </View>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 4,
+                marginTop: 8,
+              }}
+            >
+              <Text style={{ fontSize: 12, color: Colors.textSecondary }}>
+                Tocca per i dettagli
+              </Text>
+              <Ionicons
+                name="chevron-forward"
+                size={12}
+                color={Colors.textSecondary}
+              />
+            </View>
+          </TouchableOpacity>
         ) : (
           // Form salva parcheggio
           <View>
-            <Text
-              style={{
-                fontSize: 22,
-                fontWeight: "800",
-                color: Colors.textPrimary,
-                marginBottom: 4,
-              }}
-            >
-              Dove ho parcheggiato?
-            </Text>
-            <Text
-              style={{
-                fontSize: 14,
-                color: Colors.textSecondary,
-                marginBottom: 24,
-              }}
-            >
-              Salva la posizione — visibile solo a te
-            </Text>
-
-            {/* Bottone GPS */}
+            {/* GPS */}
             <Text
               style={{
                 fontSize: 12,
@@ -553,9 +563,9 @@ export default function ParcheggioSalvato() {
                 backgroundColor: loadingPosizione
                   ? Colors.surfaceAlt
                   : Colors.primary,
-                padding: 14,
+                padding: 16,
                 borderRadius: 14,
-                marginBottom: 8,
+                marginBottom: 10,
                 alignItems: "center",
                 flexDirection: "row",
                 justifyContent: "center",
@@ -574,20 +584,21 @@ export default function ParcheggioSalvato() {
                     color={Colors.white}
                   />
                   <Text style={{ color: Colors.white, fontWeight: "700" }}>
-                    {latitude ? "Aggiorna posizione" : "Rileva posizione GPS"}
+                    {latitude
+                      ? "Aggiorna posizione GPS"
+                      : "Rileva posizione GPS"}
                   </Text>
                 </>
               )}
             </TouchableOpacity>
 
-            {/* Indirizzo rilevato */}
             {latitude && longitude && (
               <View
                 style={{
                   backgroundColor: Colors.secondary + "15",
                   padding: 12,
                   borderRadius: 12,
-                  marginBottom: 16,
+                  marginBottom: 20,
                   flexDirection: "row",
                   alignItems: "center",
                   gap: 8,
@@ -624,20 +635,23 @@ export default function ParcheggioSalvato() {
                 borderRadius: 14,
                 borderWidth: 1,
                 borderColor: Colors.border,
-                marginBottom: 16,
+                marginBottom: 20,
               }}
             >
-              <View style={{ padding: 12, minHeight: 80 }}>
-                <Text
-                  style={{
-                    fontSize: 15,
-                    color: note ? Colors.textPrimary : Colors.textSecondary,
-                  }}
-                  onPress={() => {}}
-                >
-                  {note || "Es. Piano -1, posto 42..."}
-                </Text>
-              </View>
+              <TextInput
+                style={{
+                  padding: 14,
+                  minHeight: 80,
+                  fontSize: 15,
+                  color: Colors.textPrimary,
+                  textAlignVertical: "top",
+                }}
+                placeholder="Es. Piano -1, posto 42..."
+                placeholderTextColor={Colors.textSecondary}
+                value={note}
+                onChangeText={setNote}
+                multiline
+              />
             </View>
 
             {/* Durata */}
@@ -698,6 +712,9 @@ export default function ParcheggioSalvato() {
                   alignItems: "center",
                   gap: 8,
                   marginBottom: 16,
+                  backgroundColor: Colors.danger + "15",
+                  padding: 12,
+                  borderRadius: 12,
                 }}
               >
                 <Ionicons
@@ -705,7 +722,7 @@ export default function ParcheggioSalvato() {
                   size={16}
                   color={Colors.danger}
                 />
-                <Text style={{ color: Colors.danger, fontSize: 14 }}>
+                <Text style={{ color: Colors.danger, fontSize: 14, flex: 1 }}>
                   {errore}
                 </Text>
               </View>
@@ -714,12 +731,17 @@ export default function ParcheggioSalvato() {
             <TouchableOpacity
               style={{
                 backgroundColor: salvando ? Colors.surfaceAlt : Colors.primary,
-                padding: 16,
+                padding: 18,
                 borderRadius: 16,
                 alignItems: "center",
                 flexDirection: "row",
                 justifyContent: "center",
                 gap: 8,
+                shadowColor: Colors.primary,
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                shadowOffset: { width: 0, height: 4 },
+                elevation: 4,
               }}
               onPress={handleSalva}
               disabled={salvando}
