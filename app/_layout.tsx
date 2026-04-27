@@ -30,6 +30,7 @@ function AppLayout() {
         name="aggiungi-parcheggio"
         options={{ title: "Aggiungi Parcheggio", headerShown: false }}
       />
+      <Stack.Screen name="profilo" options={{ headerShown: false }} />
     </Stack>
   );
 }
