@@ -1,7 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useState } from "react";
 import {
   Alert,
+  Image,
   Linking,
   Platform,
   ScrollView,
@@ -13,12 +15,22 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../hooks/useAuth";
 import { esci } from "../../services/auth";
+import { getProfilo } from "../../services/profilo";
 
 export default function Impostazioni() {
   const { Colors, isDark, temaPreferito, impostaTema } = useTheme();
   const { utente } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const [profilo, setProfilo] = useState<any>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (utente) {
+        getProfilo(utente.id).then(setProfilo).catch(console.log);
+      }
+    }, [utente]),
+  );
 
   const handleLogout = async () => {
     if (Platform.OS === "web") {
@@ -177,7 +189,7 @@ export default function Impostazioni() {
       >
         {/* Profilo */}
         {utente ? (
-          <View
+          <TouchableOpacity
             style={{
               backgroundColor: Colors.surface,
               borderRadius: 20,
@@ -189,25 +201,40 @@ export default function Impostazioni() {
               borderWidth: 1,
               borderColor: Colors.border,
             }}
+            onPress={() => router.push("/profilo")}
           >
+            {/* Avatar con foto */}
             <View
               style={{
-                backgroundColor: Colors.primary,
                 width: 56,
                 height: 56,
                 borderRadius: 28,
+                overflow: "hidden",
+                backgroundColor: Colors.primary,
                 justifyContent: "center",
                 alignItems: "center",
               }}
             >
-              <Text
-                style={{ fontSize: 22, fontWeight: "800", color: Colors.white }}
-              >
-                {(utente.user_metadata?.nome_utente || utente.email || "U")
-                  .charAt(0)
-                  .toUpperCase()}
-              </Text>
+              {profilo?.avatar_url ? (
+                <Image
+                  source={{ uri: profilo.avatar_url }}
+                  style={{ width: 56, height: 56 }}
+                />
+              ) : (
+                <Text
+                  style={{
+                    fontSize: 22,
+                    fontWeight: "800",
+                    color: Colors.white,
+                  }}
+                >
+                  {(utente.user_metadata?.nome_utente || utente.email || "U")
+                    .charAt(0)
+                    .toUpperCase()}
+                </Text>
+              )}
             </View>
+
             <View style={{ flex: 1 }}>
               <Text
                 style={{
@@ -216,7 +243,9 @@ export default function Impostazioni() {
                   color: Colors.textPrimary,
                 }}
               >
-                {utente.user_metadata?.nome_utente || "Utente"}
+                {profilo?.nome_utente ||
+                  utente.user_metadata?.nome_utente ||
+                  "Utente"}
               </Text>
               <Text
                 style={{
@@ -228,25 +257,12 @@ export default function Impostazioni() {
                 {utente.email}
               </Text>
             </View>
-            <View
-              style={{
-                backgroundColor: Colors.secondary + "20",
-                paddingHorizontal: 10,
-                paddingVertical: 4,
-                borderRadius: 20,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 11,
-                  fontWeight: "700",
-                  color: Colors.secondary,
-                }}
-              >
-                Attivo
-              </Text>
-            </View>
-          </View>
+            <Ionicons
+              name="chevron-forward"
+              size={18}
+              color={Colors.textSecondary}
+            />
+          </TouchableOpacity>
         ) : (
           <TouchableOpacity
             style={{

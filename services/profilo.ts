@@ -1,4 +1,3 @@
-import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { supabase } from "./supabase";
 
@@ -87,18 +86,18 @@ export const caricaFotoProfilo = async (userId: string): Promise<string> => {
     allowsEditing: true,
     aspect: [1, 1],
     quality: 0.8,
+    base64: true, // ← richiede direttamente il base64
   });
 
   if (risultato.canceled) throw new Error("Operazione annullata");
 
-  const uri = risultato.assets[0].uri;
-  const fileExt = uri.split(".").pop();
-  const fileName = `${userId}/avatar.${fileExt}`;
+  const asset = risultato.assets[0];
+  const base64 = asset.base64;
 
-  // Legge il file
-  const base64 = await FileSystem.readAsStringAsync(uri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
+  if (!base64) throw new Error("Impossibile leggere l'immagine");
+
+  const fileExt = asset.uri.split(".").pop() || "jpg";
+  const fileName = `${userId}/avatar.${fileExt}`;
 
   // Carica su Supabase Storage
   const { error } = await supabase.storage
