@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ParkApp",
+    "name": "ParkHere",
     "slug": "ParkApp",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,9 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.marioonesto.parkhere"
     },
     "android": {
+      "package": "com.marioonesto.parkhere",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -39,11 +41,37 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "ParkHere ha bisogno della tua posizione per trovare parcheggi vicini."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "ParkHere ha bisogno di accedere alle foto per il tuo profilo."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#0EA5E9"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1e0f7c6a-b14b-4e99-a961-ed6e4d8a96b9"
+      }
+    },
+    "owner": "mario95999"
   }
 }
