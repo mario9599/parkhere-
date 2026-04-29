@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Image,
   Platform,
   ScrollView,
   Text,
@@ -376,23 +377,33 @@ export default function Dettaglio() {
                     >
                       <View
                         style={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: 18,
+                          overflow: "hidden",
                           backgroundColor: Colors.primary + "20",
-                          width: 32,
-                          height: 32,
-                          borderRadius: 16,
                           justifyContent: "center",
                           alignItems: "center",
                         }}
                       >
-                        <Text
-                          style={{
-                            fontSize: 13,
-                            fontWeight: "700",
-                            color: Colors.primary,
-                          }}
-                        >
-                          {item.nome_utente.charAt(0).toUpperCase()}
-                        </Text>
+                        {item.profili?.avatar_url ? (
+                          <Image
+                            source={{
+                              uri: `${item.profili.avatar_url}?t=${Date.now()}`,
+                            }}
+                            style={{ width: 36, height: 36 }}
+                          />
+                        ) : (
+                          <Text
+                            style={{
+                              fontSize: 13,
+                              fontWeight: "700",
+                              color: Colors.primary,
+                            }}
+                          >
+                            {item.nome_utente.charAt(0).toUpperCase()}
+                          </Text>
+                        )}
                       </View>
                       <Text
                         style={{

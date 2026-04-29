@@ -12,9 +12,18 @@ export const getRecensioni = async (
 ): Promise<Recensione[]> => {
   const { data, error } = await supabase
     .from("recensioni")
-    .select("*")
+    .select(
+      `
+      *,
+      profili (
+        nome_utente,
+        avatar_url
+      )
+    `,
+    )
     .eq("parcheggio_id", parcheggioId)
     .order("created_at", { ascending: false });
+
   if (error) throw new Error(error.message);
   return data;
 };

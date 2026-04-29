@@ -19,12 +19,16 @@ export type Parcheggio = {
 //recensione dell'utente
 export type Recensione = {
   id: string;
-  parcheggioId: string;
+  parcheggio_id: string;
   utente_id: string;
   nome_utente: string;
   testo: string;
   valutazione: number;
   createdAt: string;
+  profili?: {
+    nome_utente: string;
+    avatar_url: string | null;
+  };
 };
 
 // Parcheggio salvato dall'utente
