@@ -2,24 +2,24 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../hooks/useAuth";
 import {
-    aggiornaEmail,
-    aggiornaNomeUtente,
-    caricaFotoProfilo,
-    getProfilo,
-    giorniRimanenti,
-    puoModificare,
+  aggiornaEmail,
+  aggiornaNomeUtente,
+  caricaFotoProfilo,
+  getProfilo,
+  giorniRimanenti,
+  puoModificare,
 } from "../services/profilo";
 
 export default function Profilo() {
@@ -187,7 +187,7 @@ export default function Profilo() {
                 <ActivityIndicator color={Colors.white} />
               ) : profilo?.avatar_url ? (
                 <Image
-                  source={{ uri: profilo.avatar_url }}
+                  source={{ uri: `${profilo.avatar_url}?t=${Date.now()}` }}
                   style={{ width: 90, height: 90 }}
                 />
               ) : (

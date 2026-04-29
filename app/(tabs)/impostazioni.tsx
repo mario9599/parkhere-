@@ -217,7 +217,7 @@ export default function Impostazioni() {
             >
               {profilo?.avatar_url ? (
                 <Image
-                  source={{ uri: profilo.avatar_url }}
+                  source={{ uri: `${profilo.avatar_url}?t=${Date.now()}` }}
                   style={{ width: 56, height: 56 }}
                 />
               ) : (

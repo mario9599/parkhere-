@@ -166,7 +166,7 @@ export default function Registrazione() {
               color: Colors.textPrimary,
               marginLeft: 8,
             }}
-            placeholder="mario@email.com"
+            placeholder="la tua email"
             placeholderTextColor={Colors.textSecondary}
             value={email}
             onChangeText={setEmail}
